@@ -1,0 +1,51 @@
+unlock_vault() {
+    if [ "$(uname -s)" = "Darwin" ]; then
+        # This is macOS.
+        # To save passwords to keychain run the following command:
+        # security add-generic-password -a "user@bitwarden.com" -s "bitwarden-client-id" -w "mySecret" -U
+        # security add-generic-password -a "user@bitwarden.com" -s "bitwarden-client-secret" -w "mySecret" -U
+        # security add-generic-password -a "user@bitwarden.com" -s "bitwarden-pass" -w "mySecret" -U
+        local BW_CLIENTID=$(security find-generic-password -a "user@bitwarden.com" -s "bitwarden-client-id" -w)
+        local BW_CLIENTSECRET=$(security find-generic-password -a "user@bitwarden.com" -s "bitwarden-client-secret" -w)
+        local BW_MASTER_PASS=$(security find-generic-password -a "user@bitwarden.com" -s "bitwarden-pass" -w)
+    elif [ -f "/etc/lsb-release" ] || [ -f "/etc/debian_version" ]; then
+        # Check for Ubuntu/Debian based Linux
+        if lsb_release -d | grep -iq ubuntu; then
+            # This is Ubuntu
+            # To save secrets to keyring run the following command:
+            # secret-tool store --label='bitwarden-client-id' service bitwarden-client-id
+            # secret-tool store --label='bitwarden-client-secret' service bitwarden-client-secret
+            # secret-tool store --label='bitwarden-pass' service bitwarden-pass
+            local BW_CLIENTID=$(secret-tool lookup service bitwarden-client-id)
+            local BW_CLIENTSECRET=$(secret-tool lookup service bitwarden-client-secret)
+            local BW_MASTER_PASS=$(secret-tool lookup service bitwarden-pass)
+        else
+            echo "This is Linux, but not Ubuntu."
+            return 1
+        fi
+    else
+        echo "Unknown operating system."
+        return 1
+    fi
+
+
+    # Check if the secret was successfully retrieved
+    if [ -z "$BW_CLIENTID" ]; then
+        echo "Failed to retrieve the secret."
+        return 1
+    fi
+
+    if [ -z "$BW_CLIENTSECRET" ]; then
+        echo "Failed to retrieve the secret."
+        return 1
+    fi
+
+    if [ -z "$BW_MASTER_PASS" ]; then
+        echo "Failed to retrieve the secret."
+        return 1
+    fi
+
+    BW_CLIENTID=$BW_CLIENTID BW_CLIENTSECRET=$BW_CLIENTSECRET bw login --apikey
+    BW_SESSION="$(BW_MASTER_PASS="$BW_MASTER_PASS" bw unlock --passwordenv BW_MASTER_PASS --raw)"
+    export BW_SESSION
+}
