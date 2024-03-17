@@ -1,3 +1,4 @@
 .zcompdump*
 history_files/*
 plugins/*
+.zsh_history

@@ -1,4 +1,8 @@
-source aliases.sh
+# path
+export PATH=$PATH:/usr/local/go/bin
+
+
+source "$ZDOTDIR/aliases.sh"
 eval "$(fzf --zsh)"
 
 fpath=("$ZDOTDIR/functions" $fpath)
@@ -28,6 +32,7 @@ setopt PUSHD_SILENT         # Do not print the directory stack after pushd or po
 # vim mode
 bindkey -v
 export KEYTIMEOUT=1
+bindkey -v '^?' backward-delete-char # make backspace work
 
 # you should always load the module zsh/complist before autoloading compinit
 zmodload zsh/complist
