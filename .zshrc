@@ -1,7 +1,6 @@
 # path
 export PATH=$PATH:/usr/local/go/bin
 
-
 source "$ZDOTDIR/aliases.sh"
 eval "$(fzf --zsh)"
 
