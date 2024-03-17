@@ -1,4 +1,4 @@
-source aliases.sh
+source "$ZDOTDIR/aliases.sh"
 eval "$(fzf --zsh)"
 
 fpath=("$ZDOTDIR/functions" $fpath)
