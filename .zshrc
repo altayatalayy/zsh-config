@@ -13,15 +13,26 @@ zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git:*' formats '%b'
 setopt prompt_subst
 
+# Display python venv name
+function virtualenv_info {
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        echo "("$(basename "$VIRTUAL_ENV")") "
+    else
+        echo ""
+    fi
+}
+
 
 set_prompt() {
     vcs_info
+    local venv_info="$(virtualenv_info)"
     if [[ -z ${vcs_info_msg_0_} ]]; then
-        PROMPT='%B%(?.%F{green}➜.%F{red}➜)%f  %F{cyan}%1~ %f%b'
+        PROMPT='%B%(?.%F{green}➜.%F{red}➜)%f  '${venv_info}'%F{cyan}%1~ %f%b'
     else
-        PROMPT='%B%(?.%F{green}➜.%F{red}➜)%f  %F{cyan}%1~ %f%F{blue}git:(%f%F{red}${vcs_info_msg_0_}%f%F{blue})%f%b '
+        PROMPT='%B%(?.%F{green}➜.%F{red}➜)%f  '${venv_info}'%F{cyan}%1~ %f%F{blue}git:(%f%F{red}${vcs_info_msg_0_}%f%F{blue})%f%b '
     fi
 }
+
 precmd_functions+=(set_prompt)
 
 setopt AUTO_PUSHD           # Push the current directory visited on the stack.
